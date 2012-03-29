@@ -12,7 +12,7 @@ endif
 let g:loaded_runspec = 1
 
 function s:SpecPath(path)
-  if match(a:path, '_spec\.rb$') != -1
+  if match(a:path, '_\(spec\|test\)\.rb$') != -1
     return a:path
   else
     let spec_path = substitute(a:path, '\.rb$', '_spec.rb', '')
@@ -25,9 +25,17 @@ function s:SpecPath(path)
   endif
 endfunction
 
-function s:SpecCommand()
-  let spec_directory = isdirectory('spec')
+function s:LoadPath()
+  if isdirectory('spec')
+    return ' -Ispec'
+  elseif isdirectory('test')
+    return ' -Itest'
+  else
+    return ''
+  endif
+endfunction
 
+function s:SpecCommand()
   if filereadable('Gemfile')
     let gems = join(readfile('Gemfile'))
     if match(gems, 'rspec') != -1
@@ -36,15 +44,11 @@ function s:SpecCommand()
       else
         return 'bundle exec rspec --no-color'
       endif
-    elseif spec_directory
-      return 'ruby -Ispec -rbundler/setup'
     else
-      return 'ruby -rbundler/setup'
+      return 'ruby' . s:LoadPath() . ' -rbundler/setup'
     endif
-  elseif spec_directory
-    return 'ruby -Ispec'
   else
-    return 'ruby'
+    return 'ruby' . s:LoadPath()
   endif
 endfunction
 
