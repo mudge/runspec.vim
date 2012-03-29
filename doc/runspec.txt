@@ -1,0 +1,15 @@
+*runspec.txt*  Plugin for running specs for the current file
+
+If the current file is a spec, run it; if not, guess where the spec file is and
+run that.
+
+This plugin will attempt to detect whether RSpec or a library like minitest is
+being used and run the appropriate command.
+
+A very simple mapping is made between a file and its associated spec: the file
+name is changed to end in '_spec.rb' and prefixed with 'spec/'. If the path
+starts with 'app/' (as it would in a Rails application), this is first stripped.
+
+Mappings:
+<Leader>t  or  <Plug>RunSpecRun
+  Run the spec for the current file.
