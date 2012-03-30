@@ -6,50 +6,79 @@
 "   lib/something.rb => bin/rspec --no-color spec/lib/something_spec.rb
 "   app/models/person.rb => bin/rspec --no-color spec/models/person_spec.rb
 
-if exists("g:loaded_runspec")
+if exists('g:loaded_runspec')
   finish
 endif
 let g:loaded_runspec = 1
 
 function s:SpecPath(path)
-  if match(a:path, '_\(spec\|test\)\.rb$') != -1
-    return a:path
-  else
-    let spec_path = substitute(a:path, '\.rb$', '_spec.rb', '')
+  let path = a:path
 
-    if match(spec_path, '^app/') != -1
-      let spec_path = substitute(spec_path, '^app/', '', '')
+  if match(path, '_\(spec\|test\)\.rb$') == -1
+
+    " First remove app/ from the file name if it is present.
+    if match(a:path, '^app/') != -1
+      let path = substitute(a:path, '^app/', '', '')
+    else
+      let path = a:path
     endif
 
-    return 'spec/' . spec_path
+    " Determine whether this is a spec or a test case.
+    if isdirectory('spec')
+      let path = 'spec/' . substitute(path, '\.rb$', '_spec.rb', '')
+    else
+      let path = 'test/' . substitute(path, '\.rb$', '_test.rb', '')
+    endif
   endif
+
+  return path
 endfunction
 
 function s:LoadPath()
+  let load_path = ''
+
+  if isdirectory('lib')
+    let load_path .= ' -Ilib'
+  endif
+
   if isdirectory('spec')
-    return ' -Ispec'
-  elseif isdirectory('test')
-    return ' -Itest'
+    let load_path .= ' -Ispec'
+  endif
+
+  if isdirectory('test')
+    let load_path .= ' -Itest'
+  endif
+
+  return load_path
+endfunction
+
+function s:HasBundler()
+  return filereadable('Gemfile')
+endfunction
+
+function s:HasGem(gem)
+  if s:HasBundler()
+    let gems = join(readfile('Gemfile'))
+    return match(gems, a:gem) != -1
   else
-    return ''
+    return 0
   endif
 endfunction
 
 function s:SpecCommand()
-  if filereadable('Gemfile')
-    let gems = join(readfile('Gemfile'))
-    if match(gems, 'rspec') != -1
-      if filereadable('bin/rspec')
-        return 'bin/rspec --no-color'
-      else
-        return 'bundle exec rspec --no-color'
-      endif
+  let spec_command = 'ruby' . s:LoadPath()
+
+  if s:HasGem('rspec')
+    if filereadable('bin/rspec')
+      let spec_command = 'bin/rspec --no-color'
     else
-      return 'ruby' . s:LoadPath() . ' -rbundler/setup'
+      let spec_command = 'bundle exec rspec --no-color'
     endif
-  else
-    return 'ruby' . s:LoadPath()
+  elseif s:HasBundler()
+    let spec_command .= ' -rbundler/setup'
   endif
+
+  return spec_command
 endfunction
 
 function s:RunSpec()
