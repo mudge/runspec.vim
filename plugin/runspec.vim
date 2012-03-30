@@ -6,7 +6,7 @@
 "   lib/something.rb => bin/rspec --no-color spec/lib/something_spec.rb
 "   app/models/person.rb => bin/rspec --no-color spec/models/person_spec.rb
 
-if exists("g:loaded_runspec")
+if exists('g:loaded_runspec')
   finish
 endif
 let g:loaded_runspec = 1
@@ -38,15 +38,15 @@ function s:LoadPath()
   let load_path = ''
 
   if isdirectory('lib')
-    let load_path += ' -Ilib'
+    let load_path .= ' -Ilib'
   endif
 
   if isdirectory('spec')
-    let load_path += ' -Ispec'
+    let load_path .= ' -Ispec'
   endif
 
   if isdirectory('test')
-    let load_path += ' -Itest'
+    let load_path .= ' -Itest'
   endif
 
   return load_path
@@ -75,7 +75,7 @@ function s:SpecCommand()
       let spec_command = 'bundle exec rspec --no-color'
     endif
   elseif s:HasBundler()
-    let spec_command += ' -rbundler/setup'
+    let spec_command .= ' -rbundler/setup'
   endif
 
   return spec_command
