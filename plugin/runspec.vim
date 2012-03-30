@@ -113,7 +113,7 @@ function s:RunSpec()
   endif
 endfunction
 
-if !hasmapto('<Plug>RunSpecRun')
+if !hasmapto('<Plug>RunSpecRun') && mapcheck('<Leader>t') == ''
   map <unique> <Leader>t <Plug>RunSpecRun
 endif
 
