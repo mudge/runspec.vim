@@ -1,20 +1,29 @@
-" If the current file is a spec, run it; if not, guess where the spec file is
-" and run that.
-"
-" e.g.
-"   spec/models/person_spec.rb => bin/rspec --no-color spec/models/person_spec.rb
-"   lib/something.rb => bin/rspec --no-color spec/lib/something_spec.rb
-"   app/models/person.rb => bin/rspec --no-color spec/models/person_spec.rb
+" Vim global plugin for running specs appropriate to the current file.
+" Maintainer: Paul Mucur (http://mudge.name)
 
 if exists('g:loaded_runspec')
   finish
 endif
 let g:loaded_runspec = 1
 
-" Attempt to find a test or spec for the given path.
-" First take the path, replace the end with a given extension and use findfile() to
-" locate it. If it's not found, try stripping directories one-by-one from the
-" front of the path until a match is found.
+" Internal: Attempt to find a test or spec for the given path. Do this by
+" first taking the path, replacing the end with a given extension and using
+" findfile() to locate it. If it's not found, try stripping directories one-by-one
+" from the front of the path until a match is found.
+"
+" path      - The String path of the file whose spec needs to be found.
+" extension - The String extension of the spec (either _spec.rb or _test.rb)
+"             to find.
+"
+" Examples
+"
+"   s:Hunt('app/models/user.rb', '_spec.rb')
+"   # => 'spec/models/user_spec.rb'
+"
+"   s:Hunt('lib/admin/lock.rb', '_test.rb')
+"   # => 'test/lock_test.rb'
+"
+" Returns the String path of the matching spec or 0 is none was found.
 function s:Hunt(path, extension)
   let path = substitute(a:path, '\.rb$', a:extension, '')
   let test_path = findfile(path, '**')
@@ -32,14 +41,30 @@ function s:Hunt(path, extension)
   return test_path
 endfunction
 
+" Internal: Attempt to find a spec for the given path.
+"
+" path - The String path of the file whose spec needs to be found.
+"
+" Returns the String path of the matching spec or 0 if none was found.
 function s:HuntSpec(path)
   return s:Hunt(a:path, '_spec.rb')
 endfunction
 
+" Internal: Attempt to find a test for the given path.
+"
+" path - The String path of the file whose test needs to be found.
+"
+" Returns the String path of the matching test or 0 if none was found.
 function s:HuntTest(path)
   return s:Hunt(a:path, '_test.rb')
 endfunction
 
+" Internal: The path of the test file relevant to the current path. If this
+" file is a test or spec, return that immediately, else go looking for it.
+"
+" path - The String path of the file whose spec needs to be found.
+"
+" Returns the String path of the matching spec or 0 if none was found.
 function s:SpecPath(path)
   let path = a:path
 
@@ -54,6 +79,16 @@ function s:SpecPath(path)
   return path
 endfunction
 
+" Internal: Any flags that need passing to ruby to set up the load path. Will
+" look for lib, spec and test directories and add them as -I flags when
+" appropriate.
+"
+" Examples
+"
+"   s:LoadPath()
+"   # => ' -Ilib -Ispec'
+"
+" Returns the String flags to be passed to ruby.
 function s:LoadPath()
   let load_path = ''
 
@@ -72,19 +107,48 @@ function s:LoadPath()
   return load_path
 endfunction
 
+" Internal: Whether or not Bundler is being used on the current project.
+"
+" Returns truthy if Gemfile.lock exists, false if not.
 function s:HasBundler()
-  return filereadable('Gemfile')
+  return filereadable('Gemfile.lock')
 endfunction
 
+" Internal: Whether or not a given gem is installed in the current project.
+"
+" gem - The String gem name to search for.
+"
+" Examples
+"
+"   s:HasGem('rspec')
+"   # => 40
+"
+"   s:HasGem('nonesuch')
+"   # => 0
+"
+" Returns a truthy value if the gem is present, false if not.
 function s:HasGem(gem)
   if s:HasBundler()
-    let gems = join(readfile('Gemfile'))
-    return match(gems, a:gem) != -1
+    let gems = join(readfile('Gemfile.lock'))
+    return match(gems, '\<' . a:gem . '\>') != -1
   else
     return 0
   endif
 endfunction
 
+" Internal: The appropriate command to run the tests with. If rspec is
+" present, use that (either via Bundler's binstubs or using bundle exec) or
+" fall back to calling ruby directly with an appropriate load path.
+"
+" Examples
+"
+"   s:SpecCommand()
+"   # => 'bin/rspec --no-color'
+"
+"   s:SpecCommand()
+"   # => 'ruby -Ilib -Ispec'
+"
+" Returns the String command.
 function s:SpecCommand()
   let spec_command = 'ruby' . s:LoadPath()
 
@@ -101,6 +165,12 @@ function s:SpecCommand()
   return spec_command
 endfunction
 
+" Public: Save the current file and run its specs or tests. If the file is
+" already a spec or test, run it using the appropriate command (rspec through
+" Bundler, ruby directly, etc.); if not, find the most appropriate spec or
+" test and run that.
+"
+" Returns nothing.
 function s:RunSpec()
   write
   let path = s:SpecPath(expand('%'))

@@ -4,11 +4,24 @@ If the current file is a spec, run it; if not, guess where the spec file is and
 run that.
 
 This plugin will attempt to detect whether RSpec or a library like minitest is
-being used and run the appropriate command.
+being used and run the appropriate command either using binstubs if present or
+bundle exec.
 
-A very simple mapping is made between a file and its associated spec: the file
-name is changed to end in '_spec.rb' and prefixed with 'spec/'. If the path
-starts with 'app/' (as it would in a Rails application), this is first stripped.
+If the current file is not a spec or test, the plugin will attempt to find the
+most appropriate spec or test by taking the current path, changing it to end in
+either _spec.rb or _test.rb (depending on the presence of a spec or test
+directory) and then searching for that. If nothing comes up, then the plugin
+will remove the leading directory and try again, removing directories until only
+the file name is left.
+
+e.g. given app/models/user.rb and a spec directory, the plugin will first try
+looking for app/models/user_spec.rb anywhere in the current directory. Then it
+will try models/user_spec.rb which will successfully find
+spec/models/user_spec.rb.
+
+The plugin assumes you are using Bundler to manage dependencies and relies on
+searching a valid Gemfile.lock for gems (so it should work even if your Gemfile
+only contains "gemspec").
 
 Mappings:
 <Leader>t  or  <Plug>RunSpecRun
