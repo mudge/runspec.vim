@@ -33,6 +33,10 @@ map <Leader>r <Plug>RunSpecRun
 Dependencies
 ------------
 
-In order to detect your test runner accurately, the plugin requires that you are
+In order to detect custom test runners accurately, the plugin requires that you are
 using Bundler and have a valid `Gemfile.lock` (so that it can work with
 `Gemfile`s that only specify `gemspec`).
+
+If you are not using any gems (e.g. you are using only Ruby's built-in testing
+libraries) then you should not be affected as the plugin will default to using
+`ruby` as your test runner.
