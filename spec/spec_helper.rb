@@ -2,7 +2,15 @@ require 'tmpdir'
 require 'fileutils'
 require 'vimrunner'
 
+def vim
+  @vim ||= Vimrunner::Runner.start_vim
+end
+
 RSpec.configure do |config|
+
+  config.before do
+    vim.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
+  end
 
   # cd into a temporary directory for every example.
   config.around do |example|
@@ -19,6 +27,3 @@ RSpec.configure do |config|
   end
 end
 
-def vim
-  @vim ||= Vimrunner::Runner.start_vim
-end
