@@ -3,7 +3,7 @@ require 'fileutils'
 require 'vimrunner'
 
 def vim
-  @vim ||= Vimrunner::Runner.start_vim
+  @vim ||= Vimrunner::Runner.start_gvim
 end
 
 RSpec.configure do |config|
