@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe "runspec.vim" do
   def runspec(command)
-    vim.command("echo runspec##{command}")
+    VIM.command("echo runspec##{command}")
   end
 
   describe "#SpecPath" do

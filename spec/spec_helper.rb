@@ -2,15 +2,10 @@ require 'tmpdir'
 require 'fileutils'
 require 'vimrunner'
 
-def vim
-  @vim ||= Vimrunner::Runner.start_gvim
-end
+VIM = Vimrunner::Runner.start_gvim
+VIM.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
 
 RSpec.configure do |config|
-
-  config.before do
-    vim.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
-  end
 
   # cd into a temporary directory for every example.
   config.around do |example|
@@ -22,8 +17,12 @@ RSpec.configure do |config|
     FileUtils.cd(original_dir)
   end
 
-  config.after do
-    @vim.kill if @vim
+  config.before do
+    VIM.command("cd #{FileUtils.getwd}")
+  end
+
+  config.after(:suite) do
+    VIM.kill
   end
 end
 
