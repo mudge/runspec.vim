@@ -9,12 +9,11 @@ RSpec.configure do |config|
 
   # cd into a temporary directory for every example.
   config.around do |example|
-    original_dir = FileUtils.getwd
-    Dir.mktmpdir do |tmp_dir|
-      FileUtils.cd(tmp_dir)
-      example.call
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        example.call
+      end
     end
-    FileUtils.cd(original_dir)
   end
 
   config.before do
