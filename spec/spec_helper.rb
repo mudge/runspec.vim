@@ -1,5 +1,4 @@
 require 'tmpdir'
-require 'fileutils'
 require 'vimrunner'
 
 VIM = Vimrunner.start_gui_vim
@@ -11,13 +10,10 @@ RSpec.configure do |config|
   config.around do |example|
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
+        VIM.command("cd #{dir}")
         example.call
       end
     end
-  end
-
-  config.before do
-    VIM.command("cd #{FileUtils.getwd}")
   end
 
   config.after(:suite) do
