@@ -2,7 +2,7 @@ require 'tmpdir'
 require 'fileutils'
 require 'vimrunner'
 
-VIM = Vimrunner::Runner.start_gvim
+VIM = Vimrunner.start_gui_vim
 VIM.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
 
 RSpec.configure do |config|
