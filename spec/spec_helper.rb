@@ -1,9 +1,6 @@
 require 'tmpdir'
 require 'vimrunner'
 
-VIM = Vimrunner.start_gui_vim
-VIM.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
-
 RSpec.configure do |config|
 
   # cd into a temporary directory for every example.
@@ -14,6 +11,11 @@ RSpec.configure do |config|
         example.call
       end
     end
+  end
+
+  config.before(:suite) do
+    VIM = Vimrunner.start_gui_vim
+    VIM.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
   end
 
   config.after(:suite) do
