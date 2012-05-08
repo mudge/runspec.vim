@@ -14,7 +14,7 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
-    VIM = Vimrunner.start_gui_vim
+    VIM = Vimrunner.start
     VIM.add_plugin(File.expand_path('../..', __FILE__), 'plugin/runspec.vim')
   end
 
