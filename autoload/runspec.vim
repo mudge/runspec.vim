@@ -18,14 +18,15 @@ function runspec#SpecPath(path)
   return path
 endfunction
 
-" Public: The appropriate command to run the tests with. If rspec is
-" present, use that (either via Bundler's binstubs or using bundle exec) or
+" Public: The appropriate command to run the tests with. If an executable
+" exists at script/test, prefer that over all others. Failing that, if rspec
+" is present, use that (either via Bundler's binstubs or using bundle exec) or
 " fall back to calling ruby directly with an appropriate load path.
 "
 " Examples
 "
 "   runspec#SpecCommand()
-"   # => 'bin/rspec --no-color'
+"   # => 'bin/rspec'
 "
 "   runspec#SpecCommand()
 "   # => 'ruby -Ilib -Ispec'
@@ -34,11 +35,13 @@ endfunction
 function runspec#SpecCommand()
   let spec_command = 'ruby' . s:LoadPath()
 
-  if s:HasGem('rspec')
+  if executable('./script/test')
+    let spec_command = 'script/test'
+  elseif s:HasGem('rspec')
     if executable('./bin/rspec')
-      let spec_command = 'bin/rspec --no-color'
+      let spec_command = 'bin/rspec'
     else
-      let spec_command = 'bundle exec rspec --no-color'
+      let spec_command = 'bundle exec rspec'
     endif
   elseif s:HasBundler()
     let spec_command .= ' -rbundler/setup'
