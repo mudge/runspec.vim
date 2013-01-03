@@ -30,6 +30,10 @@ you can manually map to `<Plug>RunSpecRun` like so:
 map <Leader>r <Plug>RunSpecRun
 ```
 
+You can override the automatic detection of the appropriate spec runner (e.g.
+`rspec` or `ruby`) by having an executable `script/test` that accepts a spec
+file as an argument.
+
 Dependencies
 ------------
 
