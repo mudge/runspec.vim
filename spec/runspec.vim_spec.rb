@@ -1,19 +1,17 @@
-require "spec_helper"
-
-describe "runspec.vim" do
+RSpec.describe "runspec.vim" do
   def runspec(command)
     VIM.command("echo runspec##{command}")
   end
 
   describe "#SpecPath" do
     it "returns the current path if it ends in _spec.rb" do
-      runspec('SpecPath("foo_spec.rb")').should eq("foo_spec.rb")
-      runspec('SpecPath("bar/foo_spec.rb")').should eq("bar/foo_spec.rb")
+      expect(runspec('SpecPath("foo_spec.rb")')).to eq("foo_spec.rb")
+      expect(runspec('SpecPath("bar/foo_spec.rb")')).to eq("bar/foo_spec.rb")
     end
 
     it "returns the current path if it ends in _test.rb" do
-      runspec('SpecPath("foo_test.rb")').should eq("foo_test.rb")
-      runspec('SpecPath("bar/foo_test.rb")').should eq("bar/foo_test.rb")
+      expect(runspec('SpecPath("foo_test.rb")')).to eq("foo_test.rb")
+      expect(runspec('SpecPath("bar/foo_test.rb")')).to eq("bar/foo_test.rb")
     end
 
     context "with a spec directory" do
@@ -23,18 +21,18 @@ describe "runspec.vim" do
 
       it "finds a spec with the same name" do
         FileUtils.touch("spec/foo_spec.rb")
-        runspec('SpecPath("foo.rb")').should eq("spec/foo_spec.rb")
+        expect(runspec('SpecPath("foo.rb")')).to eq("spec/foo_spec.rb")
       end
 
       it "finds a spec with the most similar name" do
         FileUtils.mkdir("spec/models")
         FileUtils.touch("spec/models/user_spec.rb")
-        runspec('SpecPath("app/models/user.rb")').should eq("spec/models/user_spec.rb")
+        expect(runspec('SpecPath("app/models/user.rb")')).to eq("spec/models/user_spec.rb")
       end
 
       it "finds a spec even if the file doesn't end in .rb" do
         FileUtils.touch("spec/runspec.vim_spec.rb")
-        runspec('SpecPath("autoload/runspec.vim")').should eq("spec/runspec.vim_spec.rb")
+        expect(runspec('SpecPath("autoload/runspec.vim")')).to eq("spec/runspec.vim_spec.rb")
       end
     end
 
@@ -45,13 +43,13 @@ describe "runspec.vim" do
 
       it "finds a test with the same name" do
         FileUtils.touch("test/foo_test.rb")
-        runspec('SpecPath("foo.rb")').should eq("test/foo_test.rb")
+        expect(runspec('SpecPath("foo.rb")')).to eq("test/foo_test.rb")
       end
 
       it "finds a test with the most similar name" do
         FileUtils.mkdir("test/unit")
         FileUtils.touch("test/unit/user_test.rb")
-        runspec('SpecPath("app/models/user.rb")').should eq("test/unit/user_test.rb")
+        expect(runspec('SpecPath("app/models/user.rb")')).to eq("test/unit/user_test.rb")
       end
     end
   end
@@ -62,26 +60,26 @@ describe "runspec.vim" do
         FileUtils.mkdir("script")
         FileUtils.touch("script/test")
         FileUtils.chmod(0755, "script/test")
-        runspec('SpecCommand()').should eq("script/test")
+        expect(runspec('SpecCommand()')).to eq("script/test")
       end
 
       it "returns a plain ruby command" do
-        runspec('SpecCommand()').should eq("ruby")
+        expect(runspec('SpecCommand()')).to eq("ruby")
       end
 
       it "includes lib on the load path if present" do
         FileUtils.mkdir("lib")
-        runspec('SpecCommand()').should eq("ruby -Ilib")
+        expect(runspec('SpecCommand()')).to eq("ruby -Ilib")
       end
 
       it "includes spec on the load path if present" do
         FileUtils.mkdir("spec")
-        runspec('SpecCommand()').should eq("ruby -Ispec")
+        expect(runspec('SpecCommand()')).to eq("ruby -Ispec")
       end
 
       it "includes test on the load path if present" do
         FileUtils.mkdir("test")
-        runspec('SpecCommand()').should eq("ruby -Itest")
+        expect(runspec('SpecCommand()')).to eq("ruby -Itest")
       end
     end
 
@@ -125,11 +123,11 @@ DEPENDENCIES
             FileUtils.mkdir("script")
             FileUtils.touch("script/test")
             FileUtils.chmod(0755, "script/test")
-            runspec('SpecCommand()').should eq("script/test")
+            expect(runspec('SpecCommand()')).to eq("script/test")
           end
 
           it "returns bin/rspec" do
-            runspec('SpecCommand()').should eq("bin/rspec")
+            expect(runspec('SpecCommand()')).to eq("bin/rspec")
           end
         end
 
@@ -138,11 +136,11 @@ DEPENDENCIES
             FileUtils.mkdir("script")
             FileUtils.touch("script/test")
             FileUtils.chmod(0755, "script/test")
-            runspec('SpecCommand()').should eq("script/test")
+            expect(runspec('SpecCommand()')).to eq("script/test")
           end
 
           it "returns bundle exec rspec" do
-            runspec('SpecCommand()').should eq("bundle exec rspec")
+            expect(runspec('SpecCommand()')).to eq("bundle exec rspec")
           end
         end
       end
@@ -156,11 +154,11 @@ DEPENDENCIES
           FileUtils.mkdir("script")
           FileUtils.touch("script/test")
           FileUtils.chmod(0755, "script/test")
-          runspec('SpecCommand()').should eq("script/test")
+          expect(runspec('SpecCommand()')).to eq("script/test")
         end
 
         it "returns ruby with Bundler included" do
-          runspec('SpecCommand()').should eq("ruby -rbundler/setup")
+          expect(runspec('SpecCommand()')).to eq("ruby -rbundler/setup")
         end
       end
     end

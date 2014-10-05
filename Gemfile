@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-gem 'vimrunner', '0.1.0'
-gem 'rake',      '0.9.2.2'
-gem 'rspec',     '~> 2.9.0'
+gem 'vimrunner', '~> 0.3.1'
+gem 'rake',      '~> 10.3.2'
+gem 'rspec',     '~> 3.1.0'
 
