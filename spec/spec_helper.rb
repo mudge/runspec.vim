@@ -19,6 +19,7 @@ RSpec.configure do |config|
   end
 
   config.after(:suite) do
+    VIM.command("silent maca hide:")
     VIM.kill
   end
 end
