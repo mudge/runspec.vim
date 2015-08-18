@@ -7,7 +7,7 @@
 function runspec#SpecPath(path)
   let path = a:path
 
-  if match(path, '_\(spec\|test\)\.rb$') == -1
+  if s:IsNotTest(path)
     if isdirectory('spec')
       let path = s:HuntSpec(path)
     else
@@ -160,3 +160,12 @@ function s:HasGem(gem)
   endif
 endfunction
 
+let s:test_regex = '_\(spec\|test\)\.rb$'
+
+function s:IsNotTest(path)
+  return match(a:path, s:test_regex) == -1
+endfunction
+
+function s:IsTest(path)
+  return !s:IsNotTest(a:path)
+endfunction
