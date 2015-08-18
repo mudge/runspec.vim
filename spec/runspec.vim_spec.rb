@@ -3,6 +3,11 @@ RSpec.describe "runspec.vim" do
     VIM.command("echo runspec##{command}")
   end
 
+  def touch(filepath)
+    FileUtils.mkdir_p(File.dirname(filepath))
+    FileUtils.touch(filepath)
+  end
+
   describe "#SpecPath" do
     it "returns the current path if it ends in _spec.rb" do
       expect(runspec('SpecPath("foo_spec.rb")')).to eq("foo_spec.rb")
@@ -42,14 +47,53 @@ RSpec.describe "runspec.vim" do
       end
 
       it "finds a test with the same name" do
-        FileUtils.touch("test/foo_test.rb")
+        touch("test/foo_test.rb")
+        touch("foo.rb")
         expect(runspec('SpecPath("foo.rb")')).to eq("test/foo_test.rb")
       end
 
       it "finds a test with the most similar name" do
-        FileUtils.mkdir("test/unit")
-        FileUtils.touch("test/unit/user_test.rb")
+        touch("app/models/user.rb")
+        touch("test/unit/user_test.rb")
         expect(runspec('SpecPath("app/models/user.rb")')).to eq("test/unit/user_test.rb")
+      end
+
+      it "finds a test from a lib directory" do
+        touch("lib/app_name/something.rb")
+        touch("test/app_name/something_test.rb")
+        expect(runspec('SpecPath("lib/app_name/something.rb")')).to eq("test/app_name/something_test.rb")
+      end
+    end
+  end
+
+  describe "#TargetPath" do
+    it "returns the current path if it doesn't contain _spec or _test" do
+      expect(runspec('TargetPath("foo.rb")')).to eq("foo.rb")
+      expect(runspec('TargetPath("bar/foo.rb")')).to eq("bar/foo.rb")
+    end
+
+    context "with a spec directory" do
+      it "finds a target with the same name" do
+        touch("foo.rb")
+        expect(runspec('TargetPath("spec/foo_spec.rb")')).to eq("foo.rb")
+      end
+
+      it "finds a target with the most similar name" do
+        touch("app/models/user.rb")
+        expect(runspec('TargetPath("spec/models/user_spec.rb")')).to eq("app/models/user.rb")
+      end
+    end
+
+    context "with a test directory" do
+      it "finds a target with the same name" do
+        touch("foo.rb")
+        expect(runspec('TargetPath("test/foo_test.rb")')).to eq("foo.rb")
+      end
+
+      it "finds a target with the most similar name" do
+        touch("app/models/user.rb")
+        touch("test/unit/user_test.rb")
+        expect(runspec('TargetPath("test/unit/user_test.rb")')).to eq("app/models/user.rb")
       end
     end
   end

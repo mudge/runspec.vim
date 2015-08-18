@@ -23,6 +23,15 @@ function s:RunSpec()
   endif
 endfunction
 
+function s:ToggleTestOrTarget()
+  let path = runspec#TogglePath(expand('%'))
+  if type(path) == type('')
+    exec ':e ' . path
+  else
+    echo 'No matching test or target found'
+  endif
+endfunction
+
 if !hasmapto('<Plug>RunSpecRun') && mapcheck('<Leader>t') == ''
   map <unique> <Leader>t <Plug>RunSpecRun
 endif
@@ -30,6 +39,9 @@ endif
 " Expose a single RunSpecRun for mapping.
 noremap <unique> <script> <Plug>RunSpecRun <SID>Run
 noremap <SID>Run :call <SID>RunSpec()<CR>
+noremap <unique> <script> <Plug>RunSpecToggle <SID>Toggle
+noremap <SID>Toggle :call <SID>ToggleTestOrTarget()<CR>
 
 " Add a menu item.
 noremenu <script> Plugin.Run\ Spec <SID>Run
+noremenu <script> Plugin.Toggle\ between\ test\ and\ implementation <SID>Toggle

@@ -18,6 +18,34 @@ function runspec#SpecPath(path)
   return path
 endfunction
 
+" Public: The path of the target file relevant to the current path. If this
+" path is a test or spec, go look for a matching implementation file,
+" otherwise return the path unmodified.
+"
+" path - The String path of the file whose implementation needs to be found.
+"
+" Returns the String path of the matching implementation file or 0 if none was
+" found.
+function runspec#TargetPath(path)
+  let path = a:path
+
+  if s:IsTest(path)
+    let path = s:HuntTarget(path)
+  endif
+
+  return path
+endfunction
+
+function runspec#TogglePath(path)
+  let path = a:path
+  if s:IsTest(path)
+    let path = runspec#TargetPath(path)
+  else
+    let path = runspec#SpecPath(path)
+  endif
+  return path
+endfunction
+
 " Public: The appropriate command to run the tests with. If an executable
 " exists at script/test, prefer that over all others. Failing that, if rspec
 " is present, use that (either via Bundler's binstubs or using bundle exec) or
@@ -55,28 +83,32 @@ endfunction
 " findfile() to locate it. If it's not found, try stripping directories one-by-one
 " from the front of the path until a match is found.
 "
-" path      - The String path of the file whose spec needs to be found.
-" extension - The String extension of the spec (either _spec.rb or _test.rb)
-"             to find.
+" path        - The String path of the file whose spec needs to be found.
+" extension   - The String extension to strip from the path
+" replacement - The String replacement of the spec (either _spec.rb or _test.rb)
+"               to find.
 "
 " Examples
 "
-"   s:Hunt('app/models/user.rb', '_spec.rb')
+"   s:Hunt('app/models/user.rb', '\.rb$', '_spec.rb')
 "   # => 'spec/models/user_spec.rb'
 "
-"   s:Hunt('lib/admin/lock.rb', '_test.rb')
+"   s:Hunt('lib/admin/lock.rb', '\.rb$', '_test.rb')
 "   # => 'test/lock_test.rb'
 "
+"   s:Hunt('spec/models/user_spec.rb', '_\(spec\|test\)\.rb$', '.rb')
+"   # => 'app/models/user.rb'
+"
 " Returns the String path of the matching spec or 0 is none was found.
-function s:Hunt(path, extension)
-  let path = substitute(a:path, '\.rb$', '', '') . a:extension
+function s:Hunt(path, extension, replacement)
+  let path = substitute(a:path, a:extension, '', '') . a:replacement
   let test_path = findfile(path, '**')
 
   if !filereadable(test_path)
     let path_components = split(a:path, '/')
 
     if len(path_components) > 1
-      let test_path = s:Hunt(join(path_components[1:-1], '/'), a:extension)
+      let test_path = s:Hunt(join(path_components[1:-1], '/'), a:extension, a:replacement)
     else
       let test_path = 0
     endif
@@ -91,7 +123,7 @@ endfunction
 "
 " Returns the String path of the matching spec or 0 if none was found.
 function s:HuntSpec(path)
-  return s:Hunt(a:path, '_spec.rb')
+  return s:Hunt(a:path, '\.rb$', '_spec.rb')
 endfunction
 
 " Internal: Attempt to find a test for the given path.
@@ -100,7 +132,18 @@ endfunction
 "
 " Returns the String path of the matching test or 0 if none was found.
 function s:HuntTest(path)
-  return s:Hunt(a:path, '_test.rb')
+  return s:Hunt(a:path, '\.rb$', '_test.rb')
+endfunction
+
+" Internal: Attempt to find an implementation file for the given path.
+"
+" path - The String path of the file whose implementation file needs to be
+" found.
+"
+" Returns the String path of the matching target implementation or 0 if none
+" was found.
+function s:HuntTarget(path)
+  return s:Hunt(a:path, s:test_regex, '.rb')
 endfunction
 
 " Internal: Any flags that need passing to ruby to set up the load path. Will
