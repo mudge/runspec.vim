@@ -53,3 +53,10 @@ using Bundler and have a valid `Gemfile.lock` (so that it can work with
 If you are not using any gems (e.g. you are using only Ruby's built-in testing
 libraries) then you should not be affected as the plugin will default to using
 `ruby` as your test runner.
+
+License
+-------
+
+Copyright © 2015 Paul Mucur
+
+Distributed under the MIT License.
