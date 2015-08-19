@@ -54,6 +54,12 @@ If you are not using any gems (e.g. you are using only Ruby's built-in testing
 libraries) then you should not be affected as the plugin will default to using
 `ruby` as your test runner.
 
+Contributions
+-------------
+
+Thanks to [William Roe](https://github.com/wjlroe) for contributing the toggle
+functionality.
+
 License
 -------
 
