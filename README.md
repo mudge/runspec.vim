@@ -3,7 +3,8 @@ runspec.vim [![Build Status](https://secure.travis-ci.org/mudge/runspec.vim.png)
 
 A simple Vim plugin to run specs: if the current file ends in `_spec.rb` or
 `_test.rb`, run it; if not, guess where the associated spec file is and run
-that.
+that. It also includes a function for toggling between a test file and the
+associated implementation file.
 
 The plugin will attempt to automatically discover whether you are using
 [RSpec](https://www.relishapp.com/rspec) or
@@ -33,6 +34,14 @@ map <Leader>r <Plug>RunSpecRun
 You can override the automatic detection of the appropriate spec runner (e.g.
 `rspec` or `ruby`) by having an executable `script/test` that accepts a spec
 file as an argument.
+
+To toggle between having a test file open and the corresponding
+implementation file, you can map a keybinding to
+`<Plug>RunSpecToggle`, like so:
+
+```vim
+map <Leader>s <Plug>RunSpecToggle
+```
 
 Dependencies
 ------------
