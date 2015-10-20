@@ -87,28 +87,29 @@ endfunction
 " extension   - The String extension to strip from the path
 " replacement - The String replacement of the spec (either _spec.rb or _test.rb)
 "               to find.
+" search_path - The String path to search
 "
 " Examples
 "
-"   s:Hunt('app/models/user.rb', '\.rb$', '_spec.rb')
+"   s:Hunt('app/models/user.rb', '\.rb$', '_spec.rb', 'spec/**')
 "   # => 'spec/models/user_spec.rb'
 "
-"   s:Hunt('lib/admin/lock.rb', '\.rb$', '_test.rb')
+"   s:Hunt('lib/admin/lock.rb', '\.rb$', '_test.rb', 'test/**')
 "   # => 'test/lock_test.rb'
 "
-"   s:Hunt('spec/models/user_spec.rb', '_\(spec\|test\)\.rb$', '.rb')
+"   s:Hunt('spec/models/user_spec.rb', '_\(spec\|test\)\.rb$', '.rb', '**')
 "   # => 'app/models/user.rb'
 "
 " Returns the String path of the matching spec or 0 is none was found.
-function s:Hunt(path, extension, replacement)
+function s:Hunt(path, extension, replacement, search_path)
   let path = substitute(a:path, a:extension, '', '') . a:replacement
-  let test_path = findfile(path, '**')
+  let test_path = findfile(path, a:search_path)
 
   if !filereadable(test_path)
     let path_components = split(a:path, '/')
 
     if len(path_components) > 1
-      let test_path = s:Hunt(join(path_components[1:-1], '/'), a:extension, a:replacement)
+      let test_path = s:Hunt(join(path_components[1:-1], '/'), a:extension, a:replacement, a:search_path)
     else
       let test_path = 0
     endif
@@ -123,7 +124,13 @@ endfunction
 "
 " Returns the String path of the matching spec or 0 if none was found.
 function s:HuntSpec(path)
-  return s:Hunt(a:path, '\.rb$', '_spec.rb')
+  let search_path = '**'
+
+  if isdirectory('spec')
+    let search_path = 'spec/**'
+  endif
+
+  return s:Hunt(a:path, '\.rb$', '_spec.rb', search_path)
 endfunction
 
 " Internal: Attempt to find a test for the given path.
@@ -132,7 +139,13 @@ endfunction
 "
 " Returns the String path of the matching test or 0 if none was found.
 function s:HuntTest(path)
-  return s:Hunt(a:path, '\.rb$', '_test.rb')
+  let search_path = '**'
+
+  if isdirectory('test')
+    let search_path = 'test/**'
+  endif
+
+  return s:Hunt(a:path, '\.rb$', '_test.rb', search_path)
 endfunction
 
 " Internal: Attempt to find an implementation file for the given path.
@@ -143,7 +156,7 @@ endfunction
 " Returns the String path of the matching target implementation or 0 if none
 " was found.
 function s:HuntTarget(path)
-  return s:Hunt(a:path, s:test_regex, '.rb')
+  return s:Hunt(a:path, s:test_regex, '.rb', '**')
 endfunction
 
 " Internal: Any flags that need passing to ruby to set up the load path. Will
