@@ -1,15 +1,16 @@
 runspec.vim [![Build Status](https://secure.travis-ci.org/mudge/runspec.vim.png)](http://travis-ci.org/mudge/runspec.vim)
 ===========
 
-A simple Vim plugin to run specs: if the current file ends in `_spec.rb` or
-`_test.rb`, run it; if not, guess where the associated spec file is and run
-that. It also includes a function for toggling between a test file and the
-associated implementation file.
+A simple Vim plugin to run specs: if the current file ends in `_spec.rb`,
+`_test.rb` or `.feature`, run it; if not, guess where the associated spec file
+is and run that. It also includes a function for toggling between a test file
+and the associated implementation file.
 
 The plugin will attempt to automatically discover whether you are using
-[RSpec](https://www.relishapp.com/rspec) or
-[minitest/spec](http://docs.seattlerb.org/minitest/MiniTest/Spec.html) and use
-[Bundler](http://gembundler.com/) (and binstubs) if appropriate.
+[RSpec](https://www.relishapp.com/rspec),
+[minitest/spec](http://docs.seattlerb.org/minitest/MiniTest/Spec.html) or
+[Cucumber](https://cucumber.io/) and use [Bundler](http://gembundler.com/) (and
+binstubs) if appropriate.
 
 Installation
 ------------
@@ -33,7 +34,7 @@ map <Leader>r <Plug>RunSpecRun
 
 You can override the automatic detection of the appropriate spec runner (e.g.
 `rspec` or `ruby`) by having an executable `script/test` that accepts a spec
-file as an argument.
+file as an argument. Note that features will always run with `cucumber`.
 
 To toggle between having a test file open and the corresponding
 implementation file, you can map a keybinding to
@@ -63,6 +64,6 @@ functionality.
 License
 -------
 
-Copyright © 2015 Paul Mucur
+Copyright © 2015-2016 Paul Mucur
 
 Distributed under the MIT License.

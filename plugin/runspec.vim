@@ -17,7 +17,7 @@ function s:RunSpec()
   let path = runspec#SpecPath(expand('%'))
 
   if type(path) == type('')
-    exec ':!' . runspec#SpecCommand() . ' ' . shellescape(path)
+    exec ':!' . runspec#SpecCommand(path) . ' ' . shellescape(path)
   else
     echo 'No matching spec or test found.'
   endif

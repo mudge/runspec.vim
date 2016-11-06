@@ -1,5 +1,5 @@
-" Public: The path of the test file relevant to the current path. If this
-" file is a test or spec, return that immediately, else go looking for it.
+" Public: The path of the test file relevant to the current path. If this file
+" is a test, spec or feature, return that immediately, else go looking for it.
 "
 " path - The String path of the file whose spec needs to be found.
 "
@@ -10,6 +10,8 @@ function runspec#SpecPath(path)
   if s:IsNotTest(path)
     if isdirectory('spec')
       let path = s:HuntSpec(path)
+    elseif isdirectory('features')
+      let path = s:HuntFeature(path)
     else
       let path = s:HuntTest(path)
     endif
@@ -46,24 +48,38 @@ function runspec#TogglePath(path)
   return path
 endfunction
 
-" Public: The appropriate command to run the tests with. If an executable
-" exists at script/test, prefer that over all others. Failing that, if rspec
-" is present, use that (either via Bundler's binstubs or using bundle exec) or
-" fall back to calling ruby directly with an appropriate load path.
+" Public: The appropriate command to run the tests with. If this is a feature,
+" try to find the most appropriate Cucumber runner. If an executable exists at
+" script/test, prefer that over all others. Failing that, if rspec is present,
+" use that (either via Bundler's binstubs or using bundle exec) or fall back
+" to calling ruby directly with an appropriate load path.
 "
 " Examples
 "
-"   runspec#SpecCommand()
+"   runspec#SpecCommand("foo_spec.rb")
 "   # => 'bin/rspec'
 "
-"   runspec#SpecCommand()
+"   runspec#SpecCommand("foo_spec.rb")
 "   # => 'ruby -Ilib -Ispec'
 "
+"   runspec#SpecCommand("foo.feature")
+"   # => 'cucumber'
+"
 " Returns the String command.
-function runspec#SpecCommand()
+function runspec#SpecCommand(path)
   let spec_command = 'ruby' . s:LoadPath()
 
-  if executable('./script/test')
+  if s:IsFeature(a:path)
+    if s:HasGem('cucumber')
+      if executable('./bin/cucumber')
+        let spec_command = 'bin/cucumber'
+      else
+        let spec_command = 'bundle exec cucumber'
+      endif
+    else
+      let spec_command = 'cucumber'
+    end
+  elseif executable('./script/test')
     let spec_command = 'script/test'
   elseif s:HasGem('rspec')
     if executable('./bin/rspec')
@@ -78,15 +94,15 @@ function runspec#SpecCommand()
   return spec_command
 endfunction
 
-" Internal: Attempt to find a test or spec for the given path. Do this by
-" first taking the path, replacing the end with a given extension and using
-" findfile() to locate it. If it's not found, try stripping directories one-by-one
-" from the front of the path until a match is found.
+" Internal: Attempt to find a test, spec or feature for the given path. Do
+" this by first taking the path, replacing the end with a given extension and
+" using findfile() to locate it. If it's not found, try stripping directories
+" one-by-one from the front of the path until a match is found.
 "
 " path        - The String path of the file whose spec needs to be found.
 " extension   - The String extension to strip from the path
-" replacement - The String replacement of the spec (either _spec.rb or _test.rb)
-"               to find.
+" replacement - The String replacement of the spec (either _spec.rb, _test.rb
+"               or .feature) to find.
 " search_path - The String path to search
 "
 " Examples
@@ -99,6 +115,9 @@ endfunction
 "
 "   s:Hunt('spec/models/user_spec.rb', '_\(spec\|test\)\.rb$', '.rb', '**')
 "   # => 'app/models/user.rb'
+"
+"   s:Hunt('features/step_definitions/a_steps.rb', '_steps\.rb$', '.feature')
+"   # => 'features/a.feature'
 "
 " Returns the String path of the matching spec or 0 is none was found.
 function s:Hunt(path, extension, replacement, search_path)
@@ -148,6 +167,21 @@ function s:HuntTest(path)
   return s:Hunt(a:path, '\.rb$', '_test.rb', search_path)
 endfunction
 
+" Internal: Attempt to find a feature for the given path.
+"
+" path - The String path of the file whose test needs to be found.
+"
+" Returns the String path of the matching spec or 0 if none was found.
+function s:HuntFeature(path)
+  let search_path = '**'
+
+  if isdirectory('features')
+    let search_path = 'features/**'
+  endif
+
+  return s:Hunt(a:path, '_steps\.rb$', '.feature', search_path)
+endfunction
+
 " Internal: Attempt to find an implementation file for the given path.
 "
 " path - The String path of the file whose implementation file needs to be
@@ -156,7 +190,11 @@ endfunction
 " Returns the String path of the matching target implementation or 0 if none
 " was found.
 function s:HuntTarget(path)
-  return s:Hunt(a:path, s:test_regex, '.rb', '**')
+  if s:IsFeature(a:path)
+    return s:Hunt(a:path, s:test_regex, '_steps.rb', 'features/**')
+  else
+    return s:Hunt(a:path, s:test_regex, '.rb', '**')
+  endif
 endfunction
 
 " Internal: Any flags that need passing to ruby to set up the load path. Will
@@ -216,7 +254,7 @@ function s:HasGem(gem)
   endif
 endfunction
 
-let s:test_regex = '_\(spec\|test\)\.rb$'
+let s:test_regex = '\(_\(spec\|test\)\.rb\|\.feature\)$'
 
 function s:IsNotTest(path)
   return match(a:path, s:test_regex) == -1
@@ -224,4 +262,8 @@ endfunction
 
 function s:IsTest(path)
   return !s:IsNotTest(a:path)
+endfunction
+
+function s:IsFeature(path)
+  return match(a:path, '\.feature$') != -1
 endfunction
