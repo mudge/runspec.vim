@@ -1,4 +1,4 @@
-runspec.vim [![Build Status](https://secure.travis-ci.org/mudge/runspec.vim.png)](http://travis-ci.org/mudge/runspec.vim)
+runspec.vim [![Build Status](https://travis-ci.org/mudge/runspec.vim.svg?branch=master)](https://travis-ci.org/mudge/runspec.vim)
 ===========
 
 A simple Vim plugin to run specs: if the current file ends in `_spec.rb`,
