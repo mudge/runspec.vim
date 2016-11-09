@@ -44,6 +44,24 @@ RSpec.describe "runspec.vim" do
         FileUtils.touch("spec/runspec.vim_spec.rb")
         expect(runspec('SpecPath("autoload/runspec.vim")')).to eq("spec/runspec.vim_spec.rb")
       end
+
+      context "and a features directory" do
+        before do
+          FileUtils.mkdir("features")
+        end
+
+        it "finds a feature with the same prefix" do
+          touch("features/foo.feature")
+          touch("features/step_definitions/foo_steps.rb")
+          expect(runspec('SpecPath("features/step_definitions/foo_steps.rb")')).to eq("features/foo.feature")
+        end
+
+        it "finds a feature with the most similar name" do
+          touch("features/users/foo.feature")
+          touch("features/step_definitions/user/foo_steps.rb")
+          expect(runspec('SpecPath("features/step_definitions/user/foo_steps.rb")')).to eq("features/users/foo.feature")
+        end
+      end
     end
 
     context "with a test directory" do

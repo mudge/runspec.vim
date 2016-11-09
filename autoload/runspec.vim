@@ -5,16 +5,20 @@
 "
 " Returns the String path of the matching spec or 0 if none was found.
 function runspec#SpecPath(path)
-  let path = a:path
+  let path = 0
 
-  if s:IsNotTest(path)
+  if s:IsNotTest(a:path)
     if isdirectory('spec')
-      let path = s:HuntSpec(path)
-    elseif isdirectory('features')
-      let path = s:HuntFeature(path)
+      let path = s:HuntSpec(a:path)
     else
-      let path = s:HuntTest(path)
+      let path = s:HuntTest(a:path)
     endif
+
+    if !path && isdirectory('features')
+      let path = s:HuntFeature(a:path)
+    endif
+  else
+    let path = a:path
   endif
 
   return path
