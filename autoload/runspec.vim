@@ -14,7 +14,7 @@ function runspec#SpecPath(path)
       let path = s:HuntTest(a:path)
     endif
 
-    if !path && isdirectory('features')
+    if string(path) == '0' && isdirectory('features')
       let path = s:HuntFeature(a:path)
     endif
   else

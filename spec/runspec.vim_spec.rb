@@ -50,6 +50,11 @@ RSpec.describe "runspec.vim" do
           FileUtils.mkdir("features")
         end
 
+        it "finds a spec with the same name" do
+          FileUtils.touch("spec/foo_spec.rb")
+          expect(runspec('SpecPath("foo.rb")')).to eq("spec/foo_spec.rb")
+        end
+
         it "finds a feature with the same prefix" do
           touch("features/foo.feature")
           touch("features/step_definitions/foo_steps.rb")
@@ -85,6 +90,30 @@ RSpec.describe "runspec.vim" do
         touch("lib/app_name/something.rb")
         touch("test/app_name/something_test.rb")
         expect(runspec('SpecPath("lib/app_name/something.rb")')).to eq("test/app_name/something_test.rb")
+      end
+
+      context "and a features directory" do
+        before do
+          FileUtils.mkdir("features")
+        end
+
+        it "finds a test with the same name" do
+          touch("test/foo_test.rb")
+          touch("foo.rb")
+          expect(runspec('SpecPath("foo.rb")')).to eq("test/foo_test.rb")
+        end
+
+        it "finds a feature with the same prefix" do
+          touch("features/foo.feature")
+          touch("features/step_definitions/foo_steps.rb")
+          expect(runspec('SpecPath("features/step_definitions/foo_steps.rb")')).to eq("features/foo.feature")
+        end
+
+        it "finds a feature with the most similar name" do
+          touch("features/users/foo.feature")
+          touch("features/step_definitions/user/foo_steps.rb")
+          expect(runspec('SpecPath("features/step_definitions/user/foo_steps.rb")')).to eq("features/users/foo.feature")
+        end
       end
     end
 
